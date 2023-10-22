@@ -55,10 +55,9 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterWith, setFilterWith] = useState('')
-  const [nextId, setNextId] = useState(persons.length + 1)
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons').then(response => {
+    axios.get('http://localhost:3001/persons').then((response) => {
       setPersons(response.data)
     })
   }, [])
@@ -83,10 +82,19 @@ const App = () => {
       return
     }
 
-    setPersons(persons.concat({ name: newName, number: newNumber, id: nextId }))
-    setNextId(nextId + 1)
+    const personObject = {
+      name: newName,
+      number: newNumber,
+    }
+
     setNewName('')
     setNewNumber('')
+
+    axios
+      .post('http://localhost:3001/persons', personObject)
+      .then((response) => {
+        setPersons(persons.concat(response.data))
+      })
   }
 
   const personsFiltered = persons.filter((person) =>
