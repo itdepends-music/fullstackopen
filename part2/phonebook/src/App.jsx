@@ -32,20 +32,25 @@ const AddNewPersonForm = ({
   )
 }
 
-const PersonsDisplay = ({ personsFiltered }) => {
+const PersonsDisplay = ({ personsFiltered, deletePerson }) => {
   return (
     <div>
       {personsFiltered.map((person) => (
-        <PersonDisplay person={person} key={person.id} />
+        <PersonDisplay
+          person={person}
+          handleDeleteButton={() => deletePerson(person)}
+          key={person.id}
+        />
       ))}
     </div>
   )
 }
 
-const PersonDisplay = ({ person }) => {
+const PersonDisplay = ({ person, handleDeleteButton }) => {
   return (
     <div>
       {person.name} {person.number}
+      <button onClick={handleDeleteButton}>delete</button>
     </div>
   )
 }
@@ -76,23 +81,43 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
+    setNewName('')
+    setNewNumber('')
 
-    if (persons.some((person) => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
-      return
-    }
+    const foundPerson = persons.find((person) => person.name === newName)
 
     const personObject = {
       name: newName,
       number: newNumber,
     }
 
-    setNewName('')
-    setNewNumber('')
+    if (foundPerson === undefined) {
+      personService.create(personObject).then((returnedPerson) => {
+        setPersons(persons.concat(returnedPerson))
+      })
+    } else if (
+      window.confirm(
+        `$newName is already added to phonebook, replace the old number with a new one?`,
+      )
+    ) {
+      personService
+        .update(foundPerson.id, personObject)
+        .then((returnedPerson) => {
+          setPersons(
+            persons.map((person) =>
+              person.id !== foundPerson.id ? person : returnedPerson,
+            ),
+          )
+        })
+    }
+  }
 
-    personService.create(personObject).then((returnedPerson) => {
-      setPersons(persons.concat(returnedPerson))
-    })
+  const deletePerson = (person) => {
+    if (window.confirm(`Delete ${person.name}?`)) {
+      personService.deletePerson(person.id).then(() => {
+        setPersons(persons.filter((p) => p.id !== person.id))
+      })
+    }
   }
 
   const personsFiltered = persons.filter((person) =>
@@ -117,7 +142,10 @@ const App = () => {
       />
 
       <h2>Numbers</h2>
-      <PersonsDisplay personsFiltered={personsFiltered} />
+      <PersonsDisplay
+        personsFiltered={personsFiltered}
+        deletePerson={deletePerson}
+      />
     </div>
   )
 }
