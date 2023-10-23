@@ -55,11 +55,30 @@ const PersonDisplay = ({ person, handleDeleteButton }) => {
   )
 }
 
+const Notification = ({ message }) => {
+  if (message === null) {
+    return
+  }
+
+  const style = {
+    color: message.color,
+    background: 'lightgrey',
+    fontSize: 20,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  }
+
+  return <div style={style}>{message.text}</div>
+}
+
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filterWith, setFilterWith] = useState('')
+  const [notifMessage, setNotifMessage] = useState(null)
 
   useEffect(() => {
     personService.getAll().then((initialPersons) => {
@@ -94,10 +113,15 @@ const App = () => {
     if (foundPerson === undefined) {
       personService.create(personObject).then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson))
+        setNotifMessage({
+          text: `Added ${returnedPerson.name}`,
+          color: 'green',
+        })
+        setTimeout(() => setNotifMessage(null), 5000)
       })
     } else if (
       window.confirm(
-        `$newName is already added to phonebook, replace the old number with a new one?`,
+        `${newName} is already added to phonebook, replace the old number with a new one?`,
       )
     ) {
       personService
@@ -108,6 +132,8 @@ const App = () => {
               person.id !== foundPerson.id ? person : returnedPerson,
             ),
           )
+          setNotifMessage({text: `Changed number of ${returnedPerson.name}`, color: 'green'})
+          setTimeout(() => setNotifMessage(null), 5000)
         })
     }
   }
@@ -127,6 +153,9 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+
+      <Notification message={notifMessage} />
+
       <SearchFilterInput
         filterWith={filterWith}
         handleFilterWithChange={handleFilterWithChange}
