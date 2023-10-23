@@ -63,9 +63,27 @@ function CountryDisplay({ country }) {
 function CountriesNameList({ countriesFiltered }) {
   return (
     <div>
-      {countriesFiltered.map((c) => (
-        <div key={c.name.common}>{c.name.common}</div>
+      {countriesFiltered.map((country) => (
+        <CountryName country={country} key={country.name.common} />
       ))}
+    </div>
+  )
+}
+
+function CountryName({ country }) {
+  const [showCountry, setShowCountry] = useState(false)
+
+  const toggleShowCountry = () => {
+    setShowCountry(!showCountry)
+  }
+
+  const countryDisplay = showCountry ? <CountryDisplay country={country} /> : null
+  const buttonText = showCountry ? 'hide' : 'show'
+
+  return (
+    <div>
+      {country.name.common} <button onClick={toggleShowCountry}>{buttonText}</button>
+      {countryDisplay}
     </div>
   )
 }
