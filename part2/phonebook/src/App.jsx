@@ -132,8 +132,20 @@ const App = () => {
               person.id !== foundPerson.id ? person : returnedPerson,
             ),
           )
-          setNotifMessage({text: `Changed number of ${returnedPerson.name}`, color: 'green'})
+          setNotifMessage({
+            text: `Changed number of ${returnedPerson.name}`,
+            color: 'green',
+          })
           setTimeout(() => setNotifMessage(null), 5000)
+        })
+        .catch(() => {
+          console.log(
+            setNotifMessage({
+              text: `Information of ${foundPerson.name} has already been removed from the server`,
+              color: 'red',
+            }),
+          )
+          setPersons(persons.filter(p => p.id !== foundPerson.id))
         })
     }
   }
