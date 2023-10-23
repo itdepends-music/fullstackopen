@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 
 const countriesUrl = 'https://studies.cs.helsinki.fi/restcountries/api/all'
+const openWeatherUrl = 'https://api.openweathermap.org/data/2.5/weather'
+const weatherIconUrl = 'https://openweathermap.org/img/wn/'
+
+const openWeatherKey = import.meta.env.VITE_OPENWEATHER_KEY
 
 function CountrySearchInput({ searchText, handleSearchTextChange }) {
   return (
@@ -56,6 +60,34 @@ function CountryDisplay({ country }) {
       </ul>
 
       <img src={country.flags.png} alt={country.flags.alt} />
+
+      <WeatherDisplay country={country} />
+    </div>
+  )
+}
+
+function WeatherDisplay({ country }) {
+  const [weatherData, setWeatherData] = useState(null)
+
+  useEffect(() => {
+    const url = `${openWeatherUrl}?lat=${country.capitalInfo.latlng[0]}&lon=${country.capitalInfo.latlng[1]}&appid=${openWeatherKey}&units=metric`
+    axios.get(url).then((response) => {
+      setWeatherData(response.data)
+    })
+  }, [country])
+
+  if (weatherData === null) {
+    return null
+  }
+
+  const iconUrl = `${weatherIconUrl}${weatherData.weather[0].icon}@2x.png`
+
+  return (
+    <div>
+      <h2>Weather in {country.capital}</h2>
+      <div>temperature {weatherData.main.temp} Celcius</div>
+      <img src={iconUrl} alt={weatherData.weather[0].description}></img>
+      <div>wind {weatherData.wind.speed} m/s</div>
     </div>
   )
 }
@@ -77,12 +109,15 @@ function CountryName({ country }) {
     setShowCountry(!showCountry)
   }
 
-  const countryDisplay = showCountry ? <CountryDisplay country={country} /> : null
+  const countryDisplay = showCountry ? (
+    <CountryDisplay country={country} />
+  ) : null
   const buttonText = showCountry ? 'hide' : 'show'
 
   return (
     <div>
-      {country.name.common} <button onClick={toggleShowCountry}>{buttonText}</button>
+      {country.name.common}{' '}
+      <button onClick={toggleShowCountry}>{buttonText}</button>
       {countryDisplay}
     </div>
   )
