@@ -129,7 +129,7 @@ const App = () => {
         .then((returnedPerson) => {
           setPersons(
             persons.map((person) =>
-              person.id !== foundPerson.id ? person : returnedPerson,
+              person.id !== returnedPerson.id ? person : returnedPerson,
             ),
           )
           setNotifMessage({
